@@ -1,5 +1,3 @@
-import React from "react";
-
 function ForceastDays() {
   return (
     <div className="w-full bg-[#120944] p-2 text-[16px] text-yellow-600 flex flex-row justify-center gap-4">

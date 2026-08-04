@@ -1,9 +1,8 @@
-import React from "react";
 import ForceastDays from "../forecastDays/ForceastDays";
 
 function WeatherSection() {
   return (
-    <section className="bg-[#0b0829] w-[70%] text-slate-50 flex flex-col gap-4 items-center">
+    <section className="bg-[#0b0829] w-[70%] text-slate-50 flex flex-col gap-4 items-center pb-4">
       <ForceastDays />
       <span className="card-title">Lyon</span>
       <p>
