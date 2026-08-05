@@ -1,4 +1,4 @@
-import ForceastDays from "../forecastDays/ForceastDays";
+import ForceastDays from "../forecastDays/ForecastDays";
 
 function WeatherSection() {
   return (
