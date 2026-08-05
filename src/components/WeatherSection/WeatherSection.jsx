@@ -21,23 +21,32 @@ function WeatherSection({ currentWeather, forecastDays }) {
 
   return (
     <section
-      className={`${getWeatherBackground(currentWeather.code)} w-[80%] text-slate-50 flex flex-col items-center pb-4 sm:w-[70%] md:w-[60%]`}
+      className={`${getWeatherBackground(currentWeather.code)} w-[80%] text-slate-50 flex flex-col items-center gap-4 pb-4 sm:w-[70%] md:w-[60%]`}
     >
       <ForecastDays forecastDays={forecastDays} />
       <span className="text-[28px] text-slate-50 pt-4">
         {currentWeather.name}
       </span>
-      <p>
-        <img
-          src={currentWeather.icon}
-          alt="Icone de la météo"
-          className="w-32 h-32"
-        />
-      </p>
-      <span className="text-[80px] text-shadow text-slate-50">
-        {currentWeather.temp}
-      </span>
-      <div className="text-[20px] text-slate-50">Vent 1km/h (360°)</div>
+
+      <img
+        src={currentWeather.icon}
+        alt="Icone de la météo"
+        className="w-32 h-32"
+      />
+
+      <div className="flex flex-col">
+        <span className="text-[80px] text-shadow text-slate-50">
+          {currentWeather.temp}
+        </span>
+
+        <span className="text-[12px] text-shadow text-slate-50">
+          min {currentWeather.tempMin}° / max {currentWeather.tempMax}°
+        </span>
+      </div>
+
+      <div className="text-[16px] text-slate-50">
+        Vent: {currentWeather.wind} km/h (360°)
+      </div>
     </section>
   );
 }

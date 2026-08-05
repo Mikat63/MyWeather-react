@@ -16,9 +16,12 @@ function Main() {
 
       setCurrentWeather({
         name: data.location.name,
-        temp: data.current.temp_c,
+        temp: Math.round(data.current.temp_c),
+        tempMin: Math.round(data.forecast.forecastday[0].day.mintemp_c),
+        tempMax: Math.round(data.forecast.forecastday[0].day.maxtemp_c),
         icon: data.current.condition.icon,
         code: data.current.condition.code,
+        wind: data.current.wind_kph,
       });
 
       setForecastDays(data.forecast.forecastday);
@@ -56,6 +59,18 @@ function Main() {
     );
     return () => clearInterval(id);
   }, []);
+
+  function weatherByDay(day) {
+    setCurrentWeather({
+      name: currentWeather.name,
+      temp: Math.round(temp),
+      tempMin: day.day.mintemp_c,
+      tempMax: day.day.maxtemp_c,
+      icon: day.day.condition.icon,
+      code: day.day.condition.code,
+      wind: day.day.maxwind,
+    });
+  }
 
   return (
     <main className="w-full p-4 flex-1 flex flex-col items-center justify-center">
