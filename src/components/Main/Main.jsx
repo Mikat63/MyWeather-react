@@ -9,26 +9,45 @@ function Main() {
   useEffect(() => {
     // fetch api for json weather infos with 3 days forecast
     async function loadWeather(lat, lon) {
-      const res = await fetch(
-        `https://api.weatherapi.com/v1/forecast.json?key=${import.meta.env.VITE_WEATHER_KEY}&q=${lat},${lon}&days=3&aqi=no&alerts=no`,
+      const storageWeather = JSON.parse(
+        localStorage.getItem("userPositionWeather"),
       );
-      const data = await res.json();
-      console.log(data);
 
-      const weatherNow = {
-        name: data.location.name,
-        temp: Math.round(data.current.temp_c),
-        tempMin: Math.round(data.forecast.forecastday[0].day.mintemp_c),
-        tempMax: Math.round(data.forecast.forecastday[0].day.maxtemp_c),
-        icon: data.current.condition.icon,
-        code: data.current.condition.code,
-        wind: data.current.wind_kph,
-      };
+      if (storageWeather) {
+        setCurrentWeather(storageWeather.currentWeather);
+        setLiveWeather(storageWeather.liveWeather);
+        setForecastDays(storageWeather.forecastDays);
+        return;
+      } else {
+        const res = await fetch(
+          `https://api.weatherapi.com/v1/forecast.json?key=${import.meta.env.VITE_WEATHER_KEY}&q=${lat},${lon}&days=3&aqi=no&alerts=no`,
+        );
+        const data = await res.json();
 
-      setLiveWeather(weatherNow);
-      setCurrentWeather(weatherNow);
+        const weatherNow = {
+          name: data.location.name,
+          temp: Math.round(data.current.temp_c),
+          tempMin: Math.round(data.forecast.forecastday[0].day.mintemp_c),
+          tempMax: Math.round(data.forecast.forecastday[0].day.maxtemp_c),
+          icon: data.current.condition.icon,
+          code: data.current.condition.code,
+          wind: data.current.wind_kph,
+        };
 
-      setForecastDays(data.forecast.forecastday);
+        setLiveWeather(weatherNow);
+        setCurrentWeather(weatherNow);
+
+        setForecastDays(data.forecast.forecastday);
+
+        localStorage.setItem(
+          "userPositionWeather",
+          JSON.stringify({
+            currentWeather: weatherNow,
+            liveWeather: weatherNow,
+            forecastDays: data.forecast.forecastday,
+          }),
+        );
+      }
     }
 
     // give position, if failed or user decline, the function will use Aubiere position
@@ -77,9 +96,8 @@ function Main() {
     });
   }
 
-  function restoreCurrentWeather()
-  {
-    setCurrentWeather(liveWeather)
+  function restoreCurrentWeather() {
+    setCurrentWeather(liveWeather);
   }
 
   return (
