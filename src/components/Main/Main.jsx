@@ -17,11 +17,11 @@ function Main() {
       setCurrentWeather({
         name: data.location.name,
         temp: data.current.temp_c,
-        icon: data.condition.icon,
-        code: data.condition.code,
+        icon: data.current.condition.icon,
+        code: data.current.condition.code,
       });
 
-      setForecastDays([data.forecast]);
+      setForecastDays(data.forecast.forecastday);
     }
 
     // give position, if failed or user decline, the function will use Aubiere position
@@ -59,7 +59,10 @@ function Main() {
 
   return (
     <main className="w-full p-4 flex-1 flex flex-col items-center justify-center">
-      <WeatherSection />
+      <WeatherSection
+        currentWeather={currentWeather}
+        forecastDays={forecastDays}
+      />
     </main>
   );
 }
