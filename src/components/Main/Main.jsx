@@ -1,6 +1,62 @@
+import { useEffect, useState } from "react";
 import WeatherSection from "../WeatherSection/WeatherSection";
 
 function Main() {
+  const [currentWeather, setCurrentWeather] = useState({});
+  const [forecastDays, setForecastDays] = useState([]);
+
+  useEffect(() => {
+    // fetch api for json weather infos with 3 days forecast
+    async function loadWeather(lat, lon) {
+      const res = await fetch(
+        `https://api.weatherapi.com/v1/forecast.json?key=${import.meta.env.VITE_WEATHER_KEY}&q=${lat},${lon}&days=3&aqi=no&alerts=no`,
+      );
+      const data = await res.json();
+      console.log(data);
+
+      setCurrentWeather({
+        name: data.location.name,
+        temp: data.current.temp_c,
+        icon: data.condition.icon,
+        code: data.condition.code,
+      });
+
+      setForecastDays([data.forecast]);
+    }
+
+    // give position, if failed or user decline, the function will use Aubiere position
+    function getPosition() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            loadWeather(
+              Math.round(pos.coords.latitude * 1000) / 1000,
+              Math.round(pos.coords.longitude * 1000) / 1000,
+            );
+          },
+          () => {
+            // fallback Aubière if user don't accept to be locate
+            loadWeather(45.7494, 3.1123);
+          },
+          { enableHighAccuracy: true },
+        );
+      } else {
+        // fallback Aubière if there's a problem
+        loadWeather(45.7494, 3.1123);
+      }
+    }
+
+    getPosition();
+
+    const id = setInterval(
+      () => {
+        getPosition();
+      },
+      30 * 60 * 1000,
+    );
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <main className="w-full p-4 flex-1 flex flex-col items-center justify-center">
       <WeatherSection />
