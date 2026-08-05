@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function ForecastDays({ forecastDays }) {
+function ForecastDays({ forecastDays, weatherByDay, restoreCurrentWeather }) {
   const [selectDate, setSelectDate] = useState(null);
 
   return (
@@ -13,7 +13,10 @@ function ForecastDays({ forecastDays }) {
         return (
           <button
             key={day.date}
-            onClick={() => setSelectDate(day.date)}
+            onClick={() => {
+              setSelectDate(day.date);
+              index === 0 ? restoreCurrentWeather() : weatherByDay(day);
+            }}
             className={`${(selectDate === null ? index === 0 : day.date === selectDate) ? "scale-125 font-bold" : ""} hover:font-bold hover:scale-110 focus:font-bold focus:scale-110 cursor-pointer`}
           >
             {nomJour}

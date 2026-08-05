@@ -4,6 +4,7 @@ import WeatherSection from "../WeatherSection/WeatherSection";
 function Main() {
   const [currentWeather, setCurrentWeather] = useState({});
   const [forecastDays, setForecastDays] = useState([]);
+  const [liveWeather, setLiveWeather] = useState({});
 
   useEffect(() => {
     // fetch api for json weather infos with 3 days forecast
@@ -14,7 +15,7 @@ function Main() {
       const data = await res.json();
       console.log(data);
 
-      setCurrentWeather({
+      const weatherNow = {
         name: data.location.name,
         temp: Math.round(data.current.temp_c),
         tempMin: Math.round(data.forecast.forecastday[0].day.mintemp_c),
@@ -22,7 +23,10 @@ function Main() {
         icon: data.current.condition.icon,
         code: data.current.condition.code,
         wind: data.current.wind_kph,
-      });
+      };
+
+      setLiveWeather(weatherNow);
+      setCurrentWeather(weatherNow);
 
       setForecastDays(data.forecast.forecastday);
     }
@@ -60,16 +64,22 @@ function Main() {
     return () => clearInterval(id);
   }, []);
 
+  // function for have weather forecast days
   function weatherByDay(day) {
     setCurrentWeather({
       name: currentWeather.name,
-      temp: Math.round(temp),
-      tempMin: day.day.mintemp_c,
-      tempMax: day.day.maxtemp_c,
+      temp: Math.round(day.day.avgtemp_c),
+      tempMin: Math.round(day.day.mintemp_c),
+      tempMax: Math.round(day.day.maxtemp_c),
       icon: day.day.condition.icon,
       code: day.day.condition.code,
-      wind: day.day.maxwind,
+      wind: day.day.maxwind_kph,
     });
+  }
+
+  function restoreCurrentWeather()
+  {
+    setCurrentWeather(liveWeather)
   }
 
   return (
@@ -77,6 +87,8 @@ function Main() {
       <WeatherSection
         currentWeather={currentWeather}
         forecastDays={forecastDays}
+        weatherByDay={weatherByDay}
+        restoreCurrentWeather={restoreCurrentWeather}
       />
     </main>
   );

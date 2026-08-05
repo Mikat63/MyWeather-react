@@ -1,6 +1,11 @@
 import ForecastDays from "../forecastDays/ForecastDays";
 
-function WeatherSection({ currentWeather, forecastDays }) {
+function WeatherSection({
+  currentWeather,
+  forecastDays,
+  weatherByDay,
+  restoreCurrentWeather,
+}) {
   // method to update widget background
   function getWeatherBackground(code) {
     if (code === 1000) return "bg-gradient-to-br from-sky-400 to-blue-500"; // sunny
@@ -23,7 +28,11 @@ function WeatherSection({ currentWeather, forecastDays }) {
     <section
       className={`${getWeatherBackground(currentWeather.code)} w-[80%] text-slate-50 flex flex-col items-center gap-4 pb-4 sm:w-[70%] md:w-[60%]`}
     >
-      <ForecastDays forecastDays={forecastDays} />
+      <ForecastDays
+        forecastDays={forecastDays}
+        weatherByDay={weatherByDay}
+        restoreCurrentWeather={restoreCurrentWeather}
+      />
       <span className="text-[28px] text-slate-50 pt-4">
         {currentWeather.name}
       </span>
