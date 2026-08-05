@@ -1,9 +1,9 @@
-import ForceastDays from "../forecastDays/ForecastDays";
+import ForecastDays from "../forecastDays/ForecastDays";
 
 function WeatherSection() {
   return (
     <section className="bg-[#0b0829] w-[70%] text-slate-50 flex flex-col gap-4 items-center pb-4">
-      <ForceastDays />
+      <ForecastDays />
       <span className="card-title">Lyon</span>
       <p>
         <img src="icons/sun.svg" />

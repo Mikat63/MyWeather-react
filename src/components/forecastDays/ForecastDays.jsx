@@ -8,4 +8,4 @@ function ForecastDays() {
   );
 }
 
-export default ForceastDays;
+export default ForecastDays;
