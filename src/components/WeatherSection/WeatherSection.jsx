@@ -23,8 +23,10 @@ function WeatherSection({ currentWeather, forecastDays }) {
     <section
       className={`${getWeatherBackground(currentWeather.code)} w-[80%] text-slate-50 flex flex-col items-center pb-4 sm:w-[70%] md:w-[60%]`}
     >
-      <ForecastDays />
-      <span className="text-[28px] text-slate-50 pt-4">{currentWeather.name}</span>
+      <ForecastDays forecastDays={forecastDays} />
+      <span className="text-[28px] text-slate-50 pt-4">
+        {currentWeather.name}
+      </span>
       <p>
         <img
           src={currentWeather.icon}
@@ -32,7 +34,9 @@ function WeatherSection({ currentWeather, forecastDays }) {
           className="w-32 h-32"
         />
       </p>
-      <span className="text-[80px] text-shadow text-slate-50">{currentWeather.temp}</span>
+      <span className="text-[80px] text-shadow text-slate-50">
+        {currentWeather.temp}
+      </span>
       <div className="text-[20px] text-slate-50">Vent 1km/h (360°)</div>
     </section>
   );
