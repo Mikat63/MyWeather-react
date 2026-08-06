@@ -112,7 +112,7 @@ function Main() {
 
   return (
     <main className="w-full flex-1 flex flex-col items-center justify-center px-4 py-4 gap-5">
-      <SearchBar />
+      <SearchBar loadWeather={loadWeather} />
       <WeatherSection
         currentWeather={currentWeather}
         forecastDays={forecastDays}

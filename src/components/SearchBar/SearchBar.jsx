@@ -1,4 +1,13 @@
-function SearchBar() {
+import { useState } from "react";
+
+function SearchBar({ loadWeather }) {
+  const [researchTown, setResearchTown] = useState("");
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    loadWeather(undefined, undefined, researchTown);
+  }
+
   return (
     <div className="w-[90%] max-w-sm sm:w-[70%] sm:max-w-md md:w-[60%] md:max-w-lg flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-3 py-2 shadow-lg shadow-black/20">
       <button
@@ -9,9 +18,15 @@ function SearchBar() {
         +
       </button>
 
-      <form action="" className="flex-1 flex items-center gap-2 min-w-0">
+      <form
+        onSubmit={handleSubmit}
+        action=""
+        className="flex-1 flex items-center gap-2 min-w-0"
+      >
         <input
           type="text"
+          value={researchTown}
+          onChange={(event) => setResearchTown(event.target.value)}
           placeholder="Rechercher une ville"
           className="flex-1 min-w-0 bg-white/10 rounded-full px-4 py-2 text-sm text-slate-50 placeholder:text-slate-300/60 outline-none focus:ring-2 focus:ring-white/30 transition"
         />
