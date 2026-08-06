@@ -4,6 +4,7 @@ import SearchBar from "../SearchBar/SearchBar";
 
 function Main() {
   const [weatherCards, setWeatherCards] = useState([]);
+  const [search, setSearch] = useState(null);
 
   // fetch api for json weather infos with 3 days forecast
   async function loadWeather(lat, lon, researchTown) {
@@ -41,6 +42,7 @@ function Main() {
       };
 
       // for now: always replace with a single card (no multi-card yet)
+
       const updateCards = [
         {
           id: weatherNow.name,
@@ -50,7 +52,7 @@ function Main() {
         },
       ];
 
-      setWeatherCards(updateCards);
+      researchTown ? setSearch(updateCards[0]) : setWeatherCards(updateCards);
 
       // only persist to localStorage for the auto-position flow, never for searches
       if (!researchTown) {
@@ -132,15 +134,37 @@ function Main() {
     );
   }
 
+  function addCard() {
+    if (search) {
+      const updateToCard = [...weatherCards, search];
+
+      setWeatherCards(updateToCard);
+
+      localStorage.setItem(
+        "userPositionWeather",
+        JSON.stringify({
+          weatherCards: updateToCard,
+          createdAt: Date.now(),
+        }),
+      );
+      setSearch(null);
+      return;
+    } else {
+      return;
+    }
+  }
+
+  const cardToDisplay = search ? search : weatherCards[0];
+
   return (
     <main className="w-full flex-1 flex flex-col items-center justify-center px-4 py-4 gap-5">
-      <SearchBar loadWeather={loadWeather} />
-      {weatherCards[0] && (
+      <SearchBar loadWeather={loadWeather} addCard={addCard} />
+      {cardToDisplay && (
         <WeatherSection
-          currentWeather={weatherCards[0].currentWeather}
-          forecastDays={weatherCards[0].forecastDays}
-          weatherByDay={(day) => weatherByDay(weatherCards[0].id, day)}
-          restoreCurrentWeather={() => restoreCurrentWeather(weatherCards[0].id)}
+          currentWeather={cardToDisplay.currentWeather}
+          forecastDays={cardToDisplay.forecastDays}
+          weatherByDay={(day) => weatherByDay(cardToDisplay.id, day)}
+          restoreCurrentWeather={() => restoreCurrentWeather(cardToDisplay.id)}
         />
       )}
     </main>

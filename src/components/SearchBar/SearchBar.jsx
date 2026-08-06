@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function SearchBar({ loadWeather }) {
+function SearchBar({ loadWeather, addCard }) {
   const [researchTown, setResearchTown] = useState("");
 
   function handleSubmit(event) {
@@ -11,6 +11,7 @@ function SearchBar({ loadWeather }) {
   return (
     <div className="w-[90%] max-w-sm sm:w-[70%] sm:max-w-md md:w-[60%] md:max-w-lg flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-3 py-2 shadow-lg shadow-black/20">
       <button
+        onClick={addCard}
         type="button"
         aria-label="Ajouter une ville"
         className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-slate-50 text-xl leading-none hover:bg-white/10 hover:scale-110 focus:bg-white/10 focus:scale-110 focus:outline-none active:scale-95 transition"
