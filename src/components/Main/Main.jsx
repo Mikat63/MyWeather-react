@@ -1,10 +1,62 @@
 import { useEffect, useState } from "react";
 import WeatherSection from "../WeatherSection/WeatherSection";
+import SearchBar from "../SearchBar/SearchBar";
 
 function Main() {
   const [currentWeather, setCurrentWeather] = useState({});
   const [forecastDays, setForecastDays] = useState([]);
   const [liveWeather, setLiveWeather] = useState({});
+
+  // fetch api for json weather infos with 3 days forecast
+  async function loadWeather(lat, lon, researchTown) {
+    const storageWeather = JSON.parse(
+      localStorage.getItem("userPositionWeather"),
+    );
+
+    if (
+      storageWeather &&
+      storageWeather.createdAt + 30 * 60 * 1000 < Date.now() &&
+      !researchTown
+    ) {
+      setCurrentWeather(storageWeather.currentWeather);
+      setLiveWeather(storageWeather.liveWeather);
+      setForecastDays(storageWeather.forecastDays);
+      return;
+    } else {
+      const fetchValue = researchTown ? researchTown : `${lat},${lon}`;
+      const res = await fetch(
+        `https://api.weatherapi.com/v1/forecast.json?key=${import.meta.env.VITE_WEATHER_KEY}&q=${fetchValue}&days=3&aqi=no&alerts=no`,
+      );
+      const data = await res.json();
+
+      const weatherNow = {
+        name: data.location.name,
+        temp: Math.round(data.current.temp_c),
+        tempMin: Math.round(data.forecast.forecastday[0].day.mintemp_c),
+        tempMax: Math.round(data.forecast.forecastday[0].day.maxtemp_c),
+        icon: `https:${data.current.condition.icon}`,
+        code: data.current.condition.code,
+        wind: data.current.wind_kph,
+      };
+
+      setLiveWeather(weatherNow);
+      setCurrentWeather(weatherNow);
+
+      setForecastDays(data.forecast.forecastday);
+
+      if (!researchTown) {
+        localStorage.setItem(
+          "userPositionWeather",
+          JSON.stringify({
+            currentWeather: weatherNow,
+            liveWeather: weatherNow,
+            forecastDays: data.forecast.forecastday,
+            createdAt: Date.now(),
+          }),
+        );
+      }
+    }
+  }
 
   useEffect(() => {
     // give position, if failed or user decline, the function will use Aubiere position
@@ -29,53 +81,6 @@ function Main() {
       }
     }
 
-    // fetch api for json weather infos with 3 days forecast
-    async function loadWeather(lat, lon) {
-      const storageWeather = JSON.parse(
-        localStorage.getItem("userPositionWeather"),
-      );
-
-      if (
-        storageWeather &&
-        storageWeather.createdAt + 30 * 60 * 1000 < Date.now()
-      ) {
-        setCurrentWeather(storageWeather.currentWeather);
-        setLiveWeather(storageWeather.liveWeather);
-        setForecastDays(storageWeather.forecastDays);
-        return;
-      } else {
-        const res = await fetch(
-          `https://api.weatherapi.com/v1/forecast.json?key=${import.meta.env.VITE_WEATHER_KEY}&q=${lat},${lon}&days=3&aqi=no&alerts=no`,
-        );
-        const data = await res.json();
-
-        const weatherNow = {
-          name: data.location.name,
-          temp: Math.round(data.current.temp_c),
-          tempMin: Math.round(data.forecast.forecastday[0].day.mintemp_c),
-          tempMax: Math.round(data.forecast.forecastday[0].day.maxtemp_c),
-          icon: `https:${data.current.condition.icon}`,
-          code: data.current.condition.code,
-          wind: data.current.wind_kph,
-        };
-
-        setLiveWeather(weatherNow);
-        setCurrentWeather(weatherNow);
-
-        setForecastDays(data.forecast.forecastday);
-
-        localStorage.setItem(
-          "userPositionWeather",
-          JSON.stringify({
-            currentWeather: weatherNow,
-            liveWeather: weatherNow,
-            forecastDays: data.forecast.forecastday,
-            createdAt: Date.now(),
-          }),
-        );
-      }
-    }
-
     getPosition();
 
     const id = setInterval(
@@ -85,6 +90,7 @@ function Main() {
       30 * 60 * 1000,
     );
     return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // function for have weather forecast days
@@ -105,7 +111,8 @@ function Main() {
   }
 
   return (
-    <main className="w-full flex-1 flex flex-col items-center justify-center px-4 py-10">
+    <main className="w-full flex-1 flex flex-col items-center justify-center px-4 py-4 gap-5">
+      <SearchBar />
       <WeatherSection
         currentWeather={currentWeather}
         forecastDays={forecastDays}
