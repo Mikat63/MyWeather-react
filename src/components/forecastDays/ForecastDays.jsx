@@ -17,7 +17,8 @@ function ForecastDays({ forecastDays, weatherByDay, restoreCurrentWeather }) {
               setSelectDate(day.date);
               index === 0 ? restoreCurrentWeather() : weatherByDay(day);
             }}
-            className={`${(selectDate === null ? index === 0 : day.date === selectDate) ? "scale-125 font-bold" : ""} hover:font-bold hover:scale-110 focus:font-bold focus:scale-110 cursor-pointer`}
+            autoFocu={index === 0}
+            className={`${(selectDate === null ? index === 0 : day.date === selectDate) ? "scale-125 font-bold" : ""} hover:font-bold hover:scale-125 focus:font-bold focus:scale-125 focus:outline-none cursor-pointer`}
           >
             {nomJour}
           </button>

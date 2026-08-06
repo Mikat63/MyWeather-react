@@ -7,13 +7,38 @@ function Main() {
   const [liveWeather, setLiveWeather] = useState({});
 
   useEffect(() => {
+    // give position, if failed or user decline, the function will use Aubiere position
+    function getPosition() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            loadWeather(
+              Math.round(pos.coords.latitude * 1000) / 1000,
+              Math.round(pos.coords.longitude * 1000) / 1000,
+            );
+          },
+          () => {
+            // fallback Aubière if user don't accept to be locate
+            loadWeather(45.7494, 3.1123);
+          },
+          { enableHighAccuracy: true },
+        );
+      } else {
+        // fallback Aubière if there's a problem
+        loadWeather(45.7494, 3.1123);
+      }
+    }
+
     // fetch api for json weather infos with 3 days forecast
     async function loadWeather(lat, lon) {
       const storageWeather = JSON.parse(
         localStorage.getItem("userPositionWeather"),
       );
 
-      if (storageWeather) {
+      if (
+        storageWeather &&
+        storageWeather.createdAt + 30 * 60 * 1000 < Date.now()
+      ) {
         setCurrentWeather(storageWeather.currentWeather);
         setLiveWeather(storageWeather.liveWeather);
         setForecastDays(storageWeather.forecastDays);
@@ -45,30 +70,9 @@ function Main() {
             currentWeather: weatherNow,
             liveWeather: weatherNow,
             forecastDays: data.forecast.forecastday,
+            createdAt: Date.now(),
           }),
         );
-      }
-    }
-
-    // give position, if failed or user decline, the function will use Aubiere position
-    function getPosition() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            loadWeather(
-              Math.round(pos.coords.latitude * 1000) / 1000,
-              Math.round(pos.coords.longitude * 1000) / 1000,
-            );
-          },
-          () => {
-            // fallback Aubière if user don't accept to be locate
-            loadWeather(45.7494, 3.1123);
-          },
-          { enableHighAccuracy: true },
-        );
-      } else {
-        // fallback Aubière if there's a problem
-        loadWeather(45.7494, 3.1123);
       }
     }
 
