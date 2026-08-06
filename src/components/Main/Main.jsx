@@ -54,7 +54,7 @@ function Main() {
           temp: Math.round(data.current.temp_c),
           tempMin: Math.round(data.forecast.forecastday[0].day.mintemp_c),
           tempMax: Math.round(data.forecast.forecastday[0].day.maxtemp_c),
-          icon: data.current.condition.icon,
+          icon: `https:${data.current.condition.icon}`,
           code: data.current.condition.code,
           wind: data.current.wind_kph,
         };
@@ -94,7 +94,7 @@ function Main() {
       temp: Math.round(day.day.avgtemp_c),
       tempMin: Math.round(day.day.mintemp_c),
       tempMax: Math.round(day.day.maxtemp_c),
-      icon: day.day.condition.icon,
+      icon: `https:${day.day.condition.icon}`,
       code: day.day.condition.code,
       wind: day.day.maxwind_kph,
     });
@@ -105,7 +105,7 @@ function Main() {
   }
 
   return (
-    <main className="w-full p-4 flex-1 flex flex-col items-center justify-center">
+    <main className="w-full flex-1 flex flex-col items-center justify-center px-4 py-10">
       <WeatherSection
         currentWeather={currentWeather}
         forecastDays={forecastDays}

@@ -4,11 +4,17 @@ function ForecastDays({ forecastDays, weatherByDay, restoreCurrentWeather }) {
   const [selectDate, setSelectDate] = useState(null);
 
   return (
-    <div className="w-full bg-[#120944] p-2 text-[16px] text-yellow-600 flex flex-row justify-center gap-4">
+    <div className="w-full flex flex-row justify-center gap-1.5 bg-black/20 backdrop-blur-sm rounded-2xl p-1.5">
       {forecastDays.map((day, index) => {
-        const nomJour = new Date(day.date).toLocaleDateString("fr-FR", {
+        const nomJourCourt = new Date(day.date).toLocaleDateString("fr-FR", {
+          weekday: "short",
+        });
+        const nomJourLong = new Date(day.date).toLocaleDateString("fr-FR", {
           weekday: "long",
         });
+
+        const isSelected =
+          selectDate === null ? index === 0 : day.date === selectDate;
 
         return (
           <button
@@ -17,10 +23,15 @@ function ForecastDays({ forecastDays, weatherByDay, restoreCurrentWeather }) {
               setSelectDate(day.date);
               index === 0 ? restoreCurrentWeather() : weatherByDay(day);
             }}
-            autoFocu={index === 0}
-            className={`${(selectDate === null ? index === 0 : day.date === selectDate) ? "scale-125 font-bold" : ""} hover:font-bold hover:scale-125 focus:font-bold focus:scale-125 focus:outline-none cursor-pointer`}
+            autoFocus={index === 0}
+            className={`flex-1 min-w-0 px-2 py-2 rounded-xl text-[13px] font-medium capitalize transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
+              isSelected
+                ? "bg-white/90 text-slate-900 shadow-md scale-[1.03]"
+                : "text-slate-200/70 hover:bg-white/10 hover:text-white"
+            }`}
           >
-            {nomJour}
+            <span className="sm:hidden">{nomJourCourt}</span>
+            <span className="hidden sm:inline">{nomJourLong}</span>
           </button>
         );
       })}
