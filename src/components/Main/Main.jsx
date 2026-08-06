@@ -3,26 +3,27 @@ import WeatherSection from "../WeatherSection/WeatherSection";
 import SearchBar from "../SearchBar/SearchBar";
 
 function Main() {
-  const [currentWeather, setCurrentWeather] = useState({});
-  const [forecastDays, setForecastDays] = useState([]);
-  const [liveWeather, setLiveWeather] = useState({});
+  const [weatherCards, setWeatherCards] = useState([]);
 
   // fetch api for json weather infos with 3 days forecast
   async function loadWeather(lat, lon, researchTown) {
+    // read whatever was cached from the last position-based load
     const storageWeather = JSON.parse(
       localStorage.getItem("userPositionWeather"),
     );
 
+    // cache hit: only for the auto-position flow (not a search), and less than 30 min old
     if (
       storageWeather &&
       storageWeather.createdAt + 30 * 60 * 1000 < Date.now() &&
       !researchTown
     ) {
-      setCurrentWeather(storageWeather.currentWeather);
-      setLiveWeather(storageWeather.liveWeather);
-      setForecastDays(storageWeather.forecastDays);
+      // restore the cached cards array as-is, no fetch needed
+      setWeatherCards(storageWeather.weatherCards);
+
       return;
     } else {
+      // build the API query: searched city name if there is one, otherwise lat,lon
       const fetchValue = researchTown ? researchTown : `${lat},${lon}`;
       const res = await fetch(
         `https://api.weatherapi.com/v1/forecast.json?key=${import.meta.env.VITE_WEATHER_KEY}&q=${fetchValue}&days=3&aqi=no&alerts=no`,
@@ -39,18 +40,24 @@ function Main() {
         wind: data.current.wind_kph,
       };
 
-      setLiveWeather(weatherNow);
-      setCurrentWeather(weatherNow);
+      // for now: always replace with a single card (no multi-card yet)
+      const updateCards = [
+        {
+          id: weatherNow.name,
+          currentWeather: weatherNow,
+          liveWeather: weatherNow,
+          forecastDays: data.forecast.forecastday,
+        },
+      ];
 
-      setForecastDays(data.forecast.forecastday);
+      setWeatherCards(updateCards);
 
+      // only persist to localStorage for the auto-position flow, never for searches
       if (!researchTown) {
         localStorage.setItem(
           "userPositionWeather",
           JSON.stringify({
-            currentWeather: weatherNow,
-            liveWeather: weatherNow,
-            forecastDays: data.forecast.forecastday,
+            weatherCards: updateCards,
             createdAt: Date.now(),
           }),
         );
@@ -94,31 +101,48 @@ function Main() {
   }, []);
 
   // function for have weather forecast days
-  function weatherByDay(day) {
-    setCurrentWeather({
-      name: currentWeather.name,
-      temp: Math.round(day.day.avgtemp_c),
-      tempMin: Math.round(day.day.mintemp_c),
-      tempMax: Math.round(day.day.maxtemp_c),
-      icon: `https:${day.day.condition.icon}`,
-      code: day.day.condition.code,
-      wind: day.day.maxwind_kph,
-    });
+  function weatherByDay(id, day) {
+    setWeatherCards(
+      weatherCards.map((cardToShow) => {
+        if (id === cardToShow.id) {
+          const newCurrentWeather = {
+            name: cardToShow.currentWeather.name,
+            temp: Math.round(day.day.avgtemp_c),
+            tempMin: Math.round(day.day.mintemp_c),
+            tempMax: Math.round(day.day.maxtemp_c),
+            icon: `https:${day.day.condition.icon}`,
+            code: day.day.condition.code,
+            wind: day.day.maxwind_kph,
+          };
+          return { ...cardToShow, currentWeather: newCurrentWeather };
+        } else {
+          return cardToShow;
+        }
+      }),
+    );
   }
 
-  function restoreCurrentWeather() {
-    setCurrentWeather(liveWeather);
+  function restoreCurrentWeather(id) {
+    setWeatherCards(
+      weatherCards.map((cardToShow) =>
+        cardToShow.id === id
+          ? { ...cardToShow, currentWeather: cardToShow.liveWeather }
+          : cardToShow,
+      ),
+    );
   }
 
   return (
     <main className="w-full flex-1 flex flex-col items-center justify-center px-4 py-4 gap-5">
       <SearchBar loadWeather={loadWeather} />
-      <WeatherSection
-        currentWeather={currentWeather}
-        forecastDays={forecastDays}
-        weatherByDay={weatherByDay}
-        restoreCurrentWeather={restoreCurrentWeather}
-      />
+      {weatherCards[0] && (
+        <WeatherSection
+          currentWeather={weatherCards[0].currentWeather}
+          forecastDays={weatherCards[0].forecastDays}
+          weatherByDay={(day) => weatherByDay(weatherCards[0].id, day)}
+          restoreCurrentWeather={() => restoreCurrentWeather(weatherCards[0].id)}
+        />
+      )}
     </main>
   );
 }
