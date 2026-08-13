@@ -4,19 +4,17 @@ import SearchBar from "../SearchBar/SearchBar";
 
 function Main() {
   const [weatherCards, setWeatherCards] = useState([]);
-  const [search, setSearch] = useState(null);
+  const [searchTown, setSearchTown] = useState(null);
 
   // fetch api for json weather infos with 3 days forecast
   async function loadWeather(lat, lon, researchTown) {
     // read whatever was cached from the last position-based load
-    const storageWeather = JSON.parse(
-      localStorage.getItem("userPositionWeather"),
-    );
+    const storageWeather = JSON.parse(localStorage.getItem("myWeather"));
 
     // cache hit: only for the auto-position flow (not a search), and less than 30 min old
     if (
       storageWeather &&
-      storageWeather.createdAt + 30 * 60 * 1000 < Date.now() &&
+      storageWeather.createdAt + 30 * 60 * 1000 > Date.now() &&
       !researchTown
     ) {
       // restore the cached cards array as-is, no fetch needed
@@ -41,25 +39,23 @@ function Main() {
         wind: data.current.wind_kph,
       };
 
-      // for now: always replace with a single card (no multi-card yet)
+      const updateCards = {
+        id: researchTown ? data.location.name : "defaultCard",
+        currentGeolocoWeather: weatherNow,
+        saveCurrentGeolocWeather: weatherNow,
+        forecastDays: data.forecast.forecastday,
+      };
 
-      const updateCards = [
-        {
-          id: weatherNow.name,
-          currentWeather: weatherNow,
-          liveWeather: weatherNow,
-          forecastDays: data.forecast.forecastday,
-        },
-      ];
+      if (researchTown) {
+        setSearchTown(updateCards);
+      } else {
+        setWeatherCards([updateCards]);
 
-      researchTown ? setSearch(updateCards[0]) : setWeatherCards(updateCards);
-
-      // only persist to localStorage for the auto-position flow, never for searches
-      if (!researchTown) {
+        // only persist to localStorage for the auto-position flow, never for searches
         localStorage.setItem(
-          "userPositionWeather",
+          "myWeather",
           JSON.stringify({
-            weatherCards: updateCards,
+            weatherCards: [updateCards],
             createdAt: Date.now(),
           }),
         );
@@ -67,8 +63,8 @@ function Main() {
     }
   }
 
+  // give position, if failed or user decline, the function will use Aubiere position
   useEffect(() => {
-    // give position, if failed or user decline, the function will use Aubiere position
     function getPosition() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -102,69 +98,19 @@ function Main() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // function for have weather forecast days
-  function weatherByDay(id, day) {
-    setWeatherCards(
-      weatherCards.map((cardToShow) => {
-        if (id === cardToShow.id) {
-          const newCurrentWeather = {
-            name: cardToShow.currentWeather.name,
-            temp: Math.round(day.day.avgtemp_c),
-            tempMin: Math.round(day.day.mintemp_c),
-            tempMax: Math.round(day.day.maxtemp_c),
-            icon: `https:${day.day.condition.icon}`,
-            code: day.day.condition.code,
-            wind: day.day.maxwind_kph,
-          };
-          return { ...cardToShow, currentWeather: newCurrentWeather };
-        } else {
-          return cardToShow;
-        }
-      }),
-    );
-  }
-
-  function restoreCurrentWeather(id) {
-    setWeatherCards(
-      weatherCards.map((cardToShow) =>
-        cardToShow.id === id
-          ? { ...cardToShow, currentWeather: cardToShow.liveWeather }
-          : cardToShow,
-      ),
-    );
-  }
-
-  function addCard() {
-    if (search) {
-      const updateToCard = [...weatherCards, search];
-
-      setWeatherCards(updateToCard);
-
-      localStorage.setItem(
-        "userPositionWeather",
-        JSON.stringify({
-          weatherCards: updateToCard,
-          createdAt: Date.now(),
-        }),
-      );
-      setSearch(null);
-      return;
-    } else {
-      return;
-    }
-  }
-
-  const cardToDisplay = search ? search : weatherCards[0];
-
   return (
     <main className="w-full flex-1 flex flex-col items-center justify-center px-4 py-4 gap-5">
-      <SearchBar loadWeather={loadWeather} addCard={addCard} />
-      {cardToDisplay && (
+      <SearchBar loadWeather={loadWeather} />
+      {weatherCards[0] && (
         <WeatherSection
-          currentWeather={cardToDisplay.currentWeather}
-          forecastDays={cardToDisplay.forecastDays}
-          weatherByDay={(day) => weatherByDay(cardToDisplay.id, day)}
-          restoreCurrentWeather={() => restoreCurrentWeather(cardToDisplay.id)}
+          currentWeather={
+            searchTown
+              ? searchTown.currentGeolocoWeather
+              : weatherCards[0].currentGeolocoWeather
+          }
+          forecastDays={
+            searchTown ? searchTown.forecastDays : weatherCards[0].forecastDays
+          }
         />
       )}
     </main>
