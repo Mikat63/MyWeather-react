@@ -5,6 +5,7 @@ function WeatherSection({
   forecastDays,
   weatherByDay,
   restoreCurrentWeather,
+  idCard,
 }) {
   // method to update widget background
   function getWeatherBackground(code) {
@@ -34,6 +35,7 @@ function WeatherSection({
         forecastDays={forecastDays}
         weatherByDay={weatherByDay}
         restoreCurrentWeather={restoreCurrentWeather}
+        idCard={idCard}
       />
 
       <span className="mt-3 text-sm font-medium uppercase tracking-[0.15em] text-slate-100/80">

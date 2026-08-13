@@ -1,6 +1,11 @@
 import { useState } from "react";
 
-function ForecastDays({ forecastDays, weatherByDay, restoreCurrentWeather }) {
+function ForecastDays({
+  forecastDays,
+  weatherByDay,
+  restoreCurrentWeather,
+  idCard,
+}) {
   const [selectDate, setSelectDate] = useState(null);
 
   return (
@@ -21,7 +26,9 @@ function ForecastDays({ forecastDays, weatherByDay, restoreCurrentWeather }) {
             key={day.date}
             onClick={() => {
               setSelectDate(day.date);
-              index === 0 ? restoreCurrentWeather() : weatherByDay(day);
+              index === 0
+                ? restoreCurrentWeather(idCard)
+                : weatherByDay(idCard, day);
             }}
             autoFocus={index === 0}
             className={`flex-1 min-w-0 px-2 py-2 rounded-xl text-[13px] font-medium capitalize transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
