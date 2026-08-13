@@ -151,14 +151,14 @@ function Main() {
         ...searchTown,
         currentGeolocoWeather: searchTown.saveCurrentGeolocWeather,
       });
+    } else {
+      setWeatherCards([
+        {
+          ...weatherCards[0],
+          currentGeolocoWeather: weatherCards[0].saveCurrentGeolocWeather,
+        },
+      ]);
     }
-
-    setWeatherCards([
-      {
-        ...weatherCards[0],
-        currentGeolocoWeather: weatherCards[0].saveCurrentGeolocWeather,
-      },
-    ]);
   }
 
   return (
