@@ -5,7 +5,7 @@ function SearchBar({ loadWeather, addCard }) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    loadWeather(undefined, undefined, researchTown);
+    loadWeather(undefined, undefined, researchTown, false);
   }
 
   return (

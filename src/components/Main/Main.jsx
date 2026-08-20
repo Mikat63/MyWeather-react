@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import WeatherSection from "../WeatherSection/WeatherSection";
 import SearchBar from "../SearchBar/SearchBar";
 
 function Main() {
   const [weatherCards, setWeatherCards] = useState([]);
   const [searchTown, setSearchTown] = useState(null);
+  const weatherCardsRef = useRef(weatherCards);
 
   // give position, if failed or user decline, the function will use Aubiere position
   useEffect(() => {
@@ -34,6 +35,9 @@ function Main() {
     const id = setInterval(
       () => {
         getPosition();
+        weatherCardsRef.current.slice(1).map((weatherCard) => {
+          loadWeather(undefined, undefined, weatherCard.name, true);
+        });
       },
       30 * 60 * 1000,
     );
@@ -41,8 +45,12 @@ function Main() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    weatherCardsRef.current = weatherCards;
+  }, [weatherCards]);
+
   // fetch api for json weather infos with 3 days forecast
-  async function loadWeather(lat, lon, researchTown) {
+  async function loadWeather(lat, lon, researchTown, isRefresh) {
     // read whatever was cached from the last position-based load
     const storageWeather = JSON.parse(localStorage.getItem("myWeather"));
 
@@ -81,7 +89,16 @@ function Main() {
         forecastDays: data.forecast.forecastday,
       };
 
-      if (researchTown) {
+      if (isRefresh) {
+        const updatedCards = weatherCards.map((weatherCard) => {
+          if (updateCards.id === weatherCard.id) {
+            return updateCards;
+          } else {
+            return weatherCard;
+          }
+        });
+        setWeatherCards(updatedCards);
+      } else if (researchTown) {
         setSearchTown(updateCards);
       } else {
         setWeatherCards([updateCards]);
@@ -161,25 +178,64 @@ function Main() {
     }
   }
 
+  function addCard() {
+    // nothing to add if no town has been searched yet
+    if (!searchTown) return;
+
+    const updateCards = [...weatherCards, searchTown];
+    setSearchTown(null);
+
+    localStorage.setItem(
+      "myWeather",
+      JSON.stringify({
+        weatherCards: updateCards,
+        createdAt: Date.now(),
+      }),
+    );
+
+    return setWeatherCards(updateCards);
+  }
+
   return (
     <main className="w-full flex-1 flex flex-col items-center justify-center px-4 py-4 gap-5">
-      <SearchBar loadWeather={loadWeather} />
-      {/* only render once the geoloc card exists; searchTown may still override what's shown */}
-      {weatherCards[0] && (
-        <WeatherSection
-          currentWeather={
-            searchTown
-              ? searchTown.currentGeolocoWeather
-              : weatherCards[0].currentGeolocoWeather
-          }
-          forecastDays={
-            searchTown ? searchTown.forecastDays : weatherCards[0].forecastDays
-          }
-          weatherByDay={weatherByDay}
-          idCard={searchTown ? searchTown.id : weatherCards[0].id}
-          restoreCurrentWeather={restoreCurrentWeather}
-        />
-      )}
+      <SearchBar loadWeather={loadWeather} addCard={addCard} />
+
+      <section class="w-full flex flex-row justify-center">
+        {/* only render once the geoloc card exists; searchTown may still override what's shown */}
+        {weatherCards[0] && (
+          <WeatherSection
+            currentWeather={
+              searchTown
+                ? searchTown.currentGeolocoWeather
+                : weatherCards[0].currentGeolocoWeather
+            }
+            forecastDays={
+              searchTown
+                ? searchTown.forecastDays
+                : weatherCards[0].forecastDays
+            }
+            weatherByDay={weatherByDay}
+            idCard={searchTown ? searchTown.id : weatherCards[0].id}
+            restoreCurrentWeather={restoreCurrentWeather}
+          />
+        )}
+      </section>
+
+      <div className="w-[50%] p-0.5 bg-white/20 rounded-md"></div>
+
+      <section class="w-full flex flex-row justify-center">
+        {weatherCards.slice(1).map((weatherCard) => {
+          return (
+            <WeatherSection
+              key={weatherCard.id}
+              currentWeather={weatherCard.currentGeolocoWeather}
+              forecastDays={weatherCard.forecastDays}
+              weatherByDay={weatherByDay}
+              idCard={weatherCard.id}
+            />
+          );
+        })}
+      </section>
     </main>
   );
 }

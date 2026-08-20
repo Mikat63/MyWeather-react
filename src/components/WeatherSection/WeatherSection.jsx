@@ -6,6 +6,7 @@ function WeatherSection({
   weatherByDay,
   restoreCurrentWeather,
   idCard,
+  addCard,
 }) {
   // method to update widget background
   function getWeatherBackground(code) {
